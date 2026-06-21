@@ -5,45 +5,70 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-public class JavaUI {
-    
-    public static void main(String[] args) {
-        Color prim = new Color(0x01204E);     
-        Color sec = new Color(0x028391);      
-        Color bgg = new Color(0xF6DCAC);     
-        Color bg = new Color(0xFAA968);
-        Color acce = new Color(0xF85525);
-        JFrame tr = new JFrame();
-        tr.setTitle("Translator");
-        tr.setSize(580, 800);
-        tr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        tr.setLayout(new BorderLayout(10, 10));//gap between each components in frame (horizantal gap and vertical gap)
-        tr.getContentPane().setBackground(bg);
- //------------------------------------------------------------------------------------------------
-        //Heading of translator
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import org.json.JSONObject;
+
+public class JavaUI extends JFrame{
+    Color prim = new Color(0x01204E);     
+    Color sec = new Color(0x028391);      
+    Color bgg = new Color(0xF6DCAC);     
+    Color bg = new Color(0xFAA968);
+    Color acce = new Color(0xF85525);
+
+    JComboBox<String> sourcelanguage;
+    JComboBox<String> destinlanguage;
+    String[] lan ={ "Tamil","English", "Spanish", "French", "German", "Italian","Portuguese", "Hindi", "Chinese", "Japanese", "Arabic"};//for display
+    String[] cod ={"ta","en", "es", "fr", "de", "it","pt", "hi", "zh", "ja", "ar"};//for backend api communication
+    JTextArea input;
+    JTextArea output;
+    JButton copy,clear,trans;
+
+    public JavaUI(){
+        
+        setTitle("Translator");
+        setSize(580, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));//gap between each components in frame (horizantal gap and vertical gap)
+        getContentPane().setBackground(bg);
+
+        //components creating method
+        Components();
+        
+        setVisible(true);
+        setLocationRelativeTo(null);
+    }
+    public void Components(){
+        //colors
+        
+        //Heading section =  name of app + discription
         JPanel Headings = new JPanel();//Top title Card pannel
         Headings.setBackground(bg);
         Headings.setLayout(new BoxLayout(Headings,BoxLayout.Y_AXIS));//for top to bottom allighnemt
 
-        JLabel heads = new JLabel();
-        heads.setText("🌐 Language Translator");
+        JLabel heads = new JLabel("🌐 Language Translator");
         heads.setFont(new Font("Segoe UI",Font.BOLD,24));
         heads.setBackground(sec);
         heads.setForeground(sec);
         heads.setAlignmentX(Component.CENTER_ALIGNMENT);//for center allignment
         Headings.add(heads);
 
-        JLabel devloper = new  JLabel();
-        devloper.setText("Translates 10+ Languages");
+        JLabel devloper = new  JLabel("Translates 10+ Languages");
         devloper.setFont(new Font("Segoe UI",Font.ITALIC,16));
         devloper.setBackground(sec);
         devloper.setForeground(sec);
         devloper.setAlignmentX(Component.CENTER_ALIGNMENT);
         Headings.add(devloper);
-        tr.add(Headings,BorderLayout.NORTH);//headings in top of frame(tr) so, north
+        add(Headings,BorderLayout.NORTH);//headings in top of frame(tr) so, north
 //------------------------------------------------------------------------------------------------------
 
-        //center and operation(communication or intraction) pannel
+        //center section = input and output text area + label
+        //textarea for input and output is declared globely.
         JPanel cenop = new JPanel(new GridLayout(2,1,10,10));//adding two components input pannel and out put pannel in row wise so 2, in same collumn so 2, exah component have 10 gap in hori and verti
         cenop.setBackground(bg);
         cenop.setForeground(acce);
@@ -57,7 +82,8 @@ public class JavaUI {
         inp.setBackground(bgg);
         inp.setFont(new Font("Segoe UI",Font.BOLD,15));
 
-        JTextArea input=new JTextArea(3,25);//getting text from user
+        
+        input=new JTextArea(3,25);//getting text from user
         input.setFont(new Font("Segoe UI", Font.BOLD, 15));
         input.setLineWrap(true);//for consider new line after pressing enter in input section
         input.setWrapStyleWord(true);//java can able to break words if auto_move_nextline. yhis line help to avoid breaking the line
@@ -80,7 +106,7 @@ public class JavaUI {
         outputsec.add(out,BorderLayout.NORTH);
         out.setForeground(prim);
 
-        JTextArea output = new JTextArea(3,25);
+        output = new JTextArea(3,25);
         output.setFont(new Font("Arial Unicode MS",Font.BOLD,15));
         output.setLineWrap(true);
         output.setWrapStyleWord(true);
@@ -99,9 +125,9 @@ public class JavaUI {
         cenop.add(outputsec);
 
         //adding central operation section to tr
-        tr.add(cenop,BorderLayout.CENTER);
+        add(cenop,BorderLayout.CENTER);
 //-------------------------------------------------------------------------------------------------------------------------------
-        //Buttons section
+        //Buttoms section = language selection + buttons
 
         JPanel bottem = new JPanel(new GridLayout(2,1,10,10));//all bottens in left to right so no need for border or grid layout
         bottem.setBackground(bg);
@@ -111,14 +137,13 @@ public class JavaUI {
         //Language section section
         JPanel langpan = new JPanel();
         langpan.setBackground(acce);
-        String[] lan ={ "Tamil","English", "Spanish", "French", "German", "Italian","Portuguese", "Hindi", "Chinese", "Japanese", "Arabic"};
-        String[] cod ={"ta","en", "es", "fr", "de", "it","pt", "hi", "zh", "ja", "ar"};
-        JComboBox<String> sourcelanguage = new JComboBox<>(lan);
+        
+        sourcelanguage = new JComboBox<>(lan);
         sourcelanguage.setSelectedIndex(1);//default selection
         sourcelanguage.setPreferredSize(new Dimension(140, 35));
         sourcelanguage.setBackground(sec);
         
-        JComboBox<String> destinlanguage = new JComboBox<>(lan);
+        destinlanguage = new JComboBox<>(lan);
         destinlanguage.setSelectedIndex(0);//default selection
         destinlanguage.setPreferredSize(new Dimension(140, 35));
         destinlanguage.setBackground(sec);
@@ -134,23 +159,19 @@ public class JavaUI {
         //button pannel
         JPanel buttons = new JPanel();
         buttons.setBackground(bg);
-        JButton trans = new JButton();//Translate Button
+        
+        trans = new JButton();//Translate Button
         trans.setText("🌐 Translate");
         trans.setFont(new Font("Segoe UI",Font.BOLD,15));
         trans.setBackground(sec);
         trans.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
-                String txt = input.getText().trim();
-                if(txt.isEmpty()){
-                    output.setText("Enter Some text to translate");
-                }
-                else{
-                    output.setText(txt);
-                }
+                translate();//method  to translate
+
             }
         });
         
-        JButton clear = new JButton();//Clear Button
+        clear = new JButton();//Clear Button
         clear.setText("🗑 Clear");
         clear.setFont(new Font("Segoe UI",Font.BOLD,15));
         clear.setBackground(acce);
@@ -165,8 +186,8 @@ public class JavaUI {
                 }
             }
         });
-       
-        JButton copy = new JButton();//Copy Button
+        
+        copy = new JButton();//Copy Button
         copy.setText("📋 Copy");
         copy.setFont(new Font("Segoe UI",Font.BOLD,15));
         copy.setBackground(acce);
@@ -183,17 +204,74 @@ public class JavaUI {
             }
         });
 
-        
+        //adding buttons on buttons panel 
         buttons.add(clear);
         buttons.add(trans);
         buttons.add(copy);
         
         bottem.add(langpan);
         bottem.add(buttons);
-
-        tr.add(bottem,BorderLayout.SOUTH);
+        add(bottem,BorderLayout.SOUTH);
         
-        tr.setVisible(true);
+    }
+    public void translate(){
+        String raw = input.getText().trim();
+        if(raw.isEmpty()){
+            JOptionPane.showMessageDialog( trans,"Enter some text", "Unfetchable", JOptionPane.ERROR_MESSAGE);
+            return ;
+        }
+
+        int sourceIndex = sourcelanguage.getSelectedIndex();//selected index of "from" 
+        int destinIndex = destinlanguage.getSelectedIndex();//selected index of "to"
+
+        String sourcelangcode = cod[sourceIndex];
+        String destinalanguage = cod[destinIndex];
+        String langpair = sourcelangcode+"|"+destinalanguage;
+        
+        output.setText("Translating....");
+        
+        new Thread(()->{
+            try{
+            String encodedlangpair = URLEncoder.encode(langpair,"UTF-8");
+            String enraw = URLEncoder.encode(raw,"UTF-8");
+            String apiurl = "https://api.mymemory.translated.net/get?q="+enraw+"&langpair="+encodedlangpair;
+            URI uri = new URI(apiurl);//asigning a URL
+            URL url = uri.toURL();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();//make connection to that URL
+            connection.setRequestMethod("GET");//setting request for GET information
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");//thisadding header to request for indicate i access frombeowser(mozilla)
+            int res = connection.getResponseCode();//200 for OK,404 for not found,...
+            
+            if(res==200){
+                BufferedReader data = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringBuilder translated = new StringBuilder() ;
+                while((line=data.readLine())!=null){
+                    translated.append(line);
+                }
+                data.close();
+                JSONObject jobj = new JSONObject(translated.toString());
+                String result = jobj.getJSONObject("responseData").getString("translatedText");
+                //this for access ui from thread in safe way
+                SwingUtilities.invokeLater(() -> {
+                output.setText(result);
+                });
+
+            }
+
+            
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this, e, "MisEncoding", JOptionPane.ERROR_MESSAGE);
+        }
+        }).start();
+        
+    }
+    
+    public static void main(String[] args) {
+        new JavaUI();        
+ 
+
+
     }
     
 }
