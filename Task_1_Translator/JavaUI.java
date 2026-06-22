@@ -107,7 +107,8 @@ public class JavaUI extends JFrame{
         out.setForeground(prim);
 
         output = new JTextArea(3,25);
-        output.setFont(new Font("Arial Unicode MS",Font.BOLD,15));
+        //output.setFont(new Font("Dialog",Font.BOLD,16));
+        output.setFont(new Font("Nirmala UI", Font.PLAIN, 16));
         output.setLineWrap(true);
         output.setWrapStyleWord(true);
         output.setEditable(false);
@@ -227,6 +228,9 @@ public class JavaUI extends JFrame{
         String sourcelangcode = cod[sourceIndex];
         String destinalanguage = cod[destinIndex];
         String langpair = sourcelangcode+"|"+destinalanguage;
+        System.out.println("Source: " + sourcelangcode);
+        System.out.println("Target: " + destinalanguage);
+        System.out.println("Text: " + langpair);
         
         output.setText("Translating....");
         
@@ -241,7 +245,7 @@ public class JavaUI extends JFrame{
             connection.setRequestMethod("GET");//setting request for GET information
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");//thisadding header to request for indicate i access frombeowser(mozilla)
             int res = connection.getResponseCode();//200 for OK,404 for not found,...
-            
+        
             if(res==200){
                 BufferedReader data = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
@@ -251,13 +255,15 @@ public class JavaUI extends JFrame{
                 }
                 data.close();
                 JSONObject jobj = new JSONObject(translated.toString());
-                String result = jobj.getJSONObject("responseData").getString("translatedText");
+                //String result = jobj.getJSONObject("responseData").getString("translatedText");
                 //this for access ui from thread in safe way
                 SwingUtilities.invokeLater(() -> {
-                output.setText(result);
+                output.setText(jobj.getJSONObject("responseData").getString("translatedText"));
+                System.out.println(translated.toString());
                 });
 
             }
+            
 
             
         }catch(Exception e){
