@@ -88,7 +88,7 @@ public class JavaUI extends JFrame{
 
         
         input=new JTextArea(3,25);//getting text from user
-        input.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        input.setFont(new Font("Nirmala UI", Font.BOLD, 15));
         input.setLineWrap(true);//for consider new line after pressing enter in input section
         input.setWrapStyleWord(true);//java can able to break words if auto_move_nextline. yhis line help to avoid breaking the line
         JScrollPane inputscroll = new JScrollPane(input);//add scrollbar for input section.nor input inside/holded by inputscroll
@@ -232,7 +232,7 @@ public class JavaUI extends JFrame{
         String sourcelangcode = cod[sourceIndex];
         String destinalanguage = cod[destinIndex];
         
-        
+        String API_KEY = System.getenv("DEEPL_API_KEY");
         output.setText("Translating....");
         JSONArray text  = new JSONArray();//for store raw
         text.put(raw);
@@ -245,7 +245,7 @@ public class JavaUI extends JFrame{
 
         HttpRequest req = HttpRequest.newBuilder()
                         .uri(URI.create("https://api-free.deepl.com/v2/translate"))
-                        .header("Authorization", "DeepL-Auth-Key " + "db143a13-c9fb-463d-b3bc-71ab77d0ce70:fx")
+                        .header("Authorization", "DeepL-Auth-Key " +API_KEY)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body.toString()))//setting request to deepl
                         .build();
