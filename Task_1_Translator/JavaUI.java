@@ -10,9 +10,13 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 public class JavaUI extends JFrame{
     Color prim = new Color(0x01204E);     
@@ -227,18 +231,75 @@ public class JavaUI extends JFrame{
 
         String sourcelangcode = cod[sourceIndex];
         String destinalanguage = cod[destinIndex];
-        String langpair = sourcelangcode+"|"+destinalanguage;
-        System.out.println("Source: " + sourcelangcode);
-        System.out.println("Target: " + destinalanguage);
-        System.out.println("Text: " + langpair);
+        
         
         output.setText("Translating....");
+        JSONArray text  = new JSONArray();//for store raw
+        text.put(raw);
+
+        JSONObject body = new JSONObject();//request body
+        body.put("text",text);//addinginputtext
+        body.put("target_lang",destinalanguage);//setting destination language
+
+        HttpClient client = HttpClient.newHttpClient();//make java as client
+
+        HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api-free.deepl.com/v2/translate"))
+                        .header("Authorization", "DeepL-Auth-Key " + "db143a13-c9fb-463d-b3bc-71ab77d0ce70:fx")
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body.toString()))//setting request to deepl
+                        .build();
+
+        try{
+            HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());//Sendingg request and capture response
+            //Parse the JSON response(Prichi Mayanum)
+            output.setText(response.body());
+            JSONObject json = new JSONObject(response.body());
+            JSONArray res_text = json.getJSONArray("translations");
+            JSONObject oth_index= res_text.getJSONObject(0);//getting 0th index of res text array
+            
+            output.setText(oth_index.getString("text"));
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this, e, "MisEncoding", JOptionPane.ERROR_MESSAGE);
+        }
         
+
+        
+        
+
+    }
+    /* // For Libretranslate API.but it needs paid api key
+        JSONObject req = new JSONObject();
+        req.put("q",raw);
+        req.put("source",sourcelangcode);
+        req.put("target",destinalanguage);
+        req.put("formet","text");
+        
+        HttpClient client  =  HttpClient.newHttpClient();
+        HttpRequest requ = HttpRequest.newBuilder()
+        .uri(URI.create("https://libretranslate.com/translate"))
+        .header("Content-Type", "application/json")
+        .POST(HttpRequest.BodyPublishers.ofString(req.toString()))
+        .build();
+        
+        try{
+            HttpResponse<String> resp = client.send(requ,HttpResponse.BodyHandlers.ofString());
+            JSONObject response = new JSONObject(resp.body());
+            output.setText(response.toString());
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this, e, "MisEncoding", JOptionPane.ERROR_MESSAGE);
+        }
+        */
+
+    /* 
+    public void Mymemory( String langpair,String raw){
         new Thread(()->{
             try{
             String encodedlangpair = URLEncoder.encode(langpair,"UTF-8");
             String enraw = URLEncoder.encode(raw,"UTF-8");
+            
             String apiurl = "https://api.mymemory.translated.net/get?q="+enraw+"&langpair="+encodedlangpair;
+
             URI uri = new URI(apiurl);//asigning a URL
             URL url = uri.toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();//make connection to that URL
@@ -258,20 +319,18 @@ public class JavaUI extends JFrame{
                 //String result = jobj.getJSONObject("responseData").getString("translatedText");
                 //this for access ui from thread in safe way
                 SwingUtilities.invokeLater(() -> {
-                output.setText(jobj.getJSONObject("responseData").getString("translatedText"));
-                System.out.println(translated.toString());
+                    output.setText(jobj.getJSONObject("responseData").getString("translatedText"));
+                    
                 });
-
             }
             
-
             
         }catch(Exception e){
             JOptionPane.showMessageDialog(this, e, "MisEncoding", JOptionPane.ERROR_MESSAGE);
         }
         }).start();
-        
     }
+    */
     
     public static void main(String[] args) {
         new JavaUI();        
